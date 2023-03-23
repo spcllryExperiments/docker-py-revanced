@@ -2,7 +2,7 @@ name: Scheduled Update Check
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '0 * * * *' # hourly
 jobs:
   check-release:
     runs-on: ubuntu-latest
@@ -11,29 +11,27 @@ jobs:
         uses: actions/checkout@v2
       - name: Get latest release
         id: latest-release
+        uses: InsonusK/get-latest-release@v1.0.1
+        with:
+          owner: inotia00
+          repo: revanced-patches
+      - name: Read latest parsed version
+        id: latest-parsed-version
         run: |
-          LATEST_RELEASE=$(curl -s https://api.github.com/repos/inotia00/revanced-patches/releases/latest | jq -r '.tag_name')
-          echo "::set-output name=release::$LATEST_RELEASE"
-      - name: Compare with latest-parsed-version.md
-        id: compare
+          content=`cat latest-parsed-version.md`
+          echo "::set-output name=content::$content"
+      - name: Compare and update
+        if: ${{ steps.latest-release.outputs.tag_name != steps.latest-parsed-version.outputs.content }}
         run: |
-          LATEST_PARSED_VERSION=$(cat latest-parsed-version.md)
-          if [ "${{ steps.latest-release.outputs.release }}" != "$LATEST_PARSED_VERSION" ]; then
-            echo "::set-output name=match::false"
-          else
-            echo "::set-output name=match::true"
-          fi
-      - name: Update latest-parsed-version.md and trigger build-apk.yml
-        if: ${{ steps.compare.outputs.match == 'false' }}
-        run: |
-          echo "${{ steps.latest-release.outputs.release }}" > latest-parsed-version.md
+          echo "${{ steps.latest-release.outputs.tag_name }}" > latest-parsed-version.md
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add latest-parsed-version.md
-          git commit -m "Update latest-parsed-version.md"
+          git commit -m "Update latest parsed version"
           git push
-          curl -X POST \
-               -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               -H "Accept: application/vnd.github.v3+json" \
-               https://api.github.com/repos/OWNER/REPO/actions/workflows/build-apk.yml/dispatches \
-               -d '{"ref":"main"}'
+      - name: Trigger build APK workflow
+        if: ${{ steps.latest-release.outputs.tag_name != steps.latest-parsed-version.outputs.content }}
+        uses: benc-uk/workflow-dispatch@v1.1
+        with:
+          workflow: build-apk.yml
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
