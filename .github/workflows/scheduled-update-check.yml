@@ -1,0 +1,38 @@
+name: Scheduled Update Check
+on:
+  schedule:
+    - cron: '0 * * * *'
+jobs:
+  check-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Get latest release
+        id: latest-release
+        run: |
+          LATEST_RELEASE=$(curl -s https://api.github.com/repos/inotia00/revanced-patches/releases/latest | jq -r '.tag_name')
+          echo "::set-output name=release::$LATEST_RELEASE"
+      - name: Compare with latest-parsed-version.md
+        id: compare
+        run: |
+          LATEST_PARSED_VERSION=$(cat latest-parsed-version.md)
+          if [ "${{ steps.latest-release.outputs.release }}" != "$LATEST_PARSED_VERSION" ]; then
+            echo "::set-output name=match::false"
+          else
+            echo "::set-output name=match::true"
+          fi
+      - name: Update latest-parsed-version.md and trigger build-apk.yml
+        if: ${{ steps.compare.outputs.match == 'false' }}
+        run: |
+          echo "${{ steps.latest-release.outputs.release }}" > latest-parsed-version.md
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add latest-parsed-version.md
+          git commit -m "Update latest-parsed-version.md"
+          git push
+          curl -X POST \
+               -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               https://api.github.com/repos/OWNER/REPO/actions/workflows/build-apk.yml/dispatches \
+               -d '{"ref":"master"}'
