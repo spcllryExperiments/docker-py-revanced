@@ -31,7 +31,7 @@ jobs:
           git push
       - name: Trigger build APK workflow
         if: ${{ steps.latest-release.outputs.tag_name != steps.latest-parsed-version.outputs.content }}
-        uses: benc-uk/workflow-dispatch@v1.1
+        uses: benc-uk/workflow-dispatch@v1.2.2
         with:
           workflow: build-apk.yml
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
