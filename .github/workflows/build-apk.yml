@@ -5,7 +5,7 @@ env:
   HAVE_TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID != '' }}
 on:
   schedule:
-    - cron: "0 * * * *""
+    - cron: "0 * * * *"
   workflow_dispatch:
     inputs:
       GITHUB_UPLOAD:
