@@ -1,7 +1,8 @@
 name: Scheduled Update Check
 on:
+  workflow_dispatch:
   schedule:
-    - cron: '0 * * * *' # hourly
+    - cron: '0 * * * *'
 jobs:
   check-release:
     runs-on: ubuntu-latest
