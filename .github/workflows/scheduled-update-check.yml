@@ -1,6 +1,6 @@
 name: Scheduled Update Check
 on:
-  workflow_dispatch:
+#  workflow_dispatch:
   schedule:
     - cron: '*/10 * * * *'
 jobs:
