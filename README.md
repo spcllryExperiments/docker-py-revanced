@@ -1,5 +1,11 @@
+###### 23/MAR/2023:
+### Builds are now automated!
+Added scheduled action that checks for patch updates, and if an update is found, it will automatically trigger the workflow to build and release the updated applications.
+<hr>
+
 ### Feel free to fork this fork.
 Let the 'forkception' begin!
+
 ### How to use this fork:
 
 *Before running the workflows for the first time, you need to go the Settings page of the repository and under Actions, then General, change the "Workflow permissions" to "read and write".*
