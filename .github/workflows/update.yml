@@ -13,6 +13,12 @@ jobs:
           git config --global user.email "actions@github.com"
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Check if latest-parsed-version.md exists
+        run: |
+          if [ ! -f latest-parsed-version.md ]; then
+            echo "The file latest-parsed-version.md was not found at the base of the repository. This file is necessary for keeping track of the previously built version and compare it the remote version. To avoid generating failed runs, the workflow will now be interrupted."
+            exit 0
+          fi
       - name: Get latest release from inotia00/revanced-patches
         id: latest-release
         run: |
@@ -35,6 +41,10 @@ jobs:
       - name: Verify local version update
         if: ${{ steps.compare-version.outputs.trigger_build == 'true' }}
         run: |
+          if [ ! -f latest-parsed-version.md ]; then
+            echo "The file latest-parsed-version.md was not found at the base of the repository. This file is necessary for keeping track of the previously built version and compare it the remote version. To avoid generating failed runs, the workflow will now be interrupted."
+            exit 0
+          fi
           UPDATED_VERSION=$(cat latest-parsed-version.md)
           if [ "$UPDATED_VERSION" == "${{ steps.latest-release.outputs.tag_name }}" ]; then
             echo "Local version updated successfully!"
@@ -47,4 +57,4 @@ jobs:
         uses: benc-uk/workflow-dispatch@v1.1
         with:
           workflow: "Build & Release" # build-apk.yml
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN
