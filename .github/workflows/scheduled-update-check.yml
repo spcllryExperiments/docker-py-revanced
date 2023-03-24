@@ -25,6 +25,16 @@ jobs:
             echo "::set-output name=trigger_build::true"
           fi
         id: compare-version
+      - name: Verify local version update
+        if: ${{ steps.compare-version.outputs.trigger_build == 'true' }}
+        run: |
+          UPDATED_VERSION=$(cat latest-parsed-version.txt)
+          if [ "$UPDATED_VERSION" == "${{ steps.latest-release.outputs.tag_name }}" ]; then
+            echo "Local version updated successfully!"
+          else
+            echo "Error updating local version, halting workflow!"
+            exit 1
+          fi
       - name: Trigger build workflow
         if: ${{ steps.compare-version.outputs.trigger_build == 'true' }}
         uses: benc-uk/workflow-dispatch@v1.1
