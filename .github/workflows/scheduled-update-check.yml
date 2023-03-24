@@ -2,7 +2,7 @@ name: Scheduled Update Check
 on:
   workflow_dispatch:
   schedule:
-    - cron: '* * * * *'
+    - cron: '*/10 * * * *'
 jobs:
   check-update:
     runs-on: ubuntu-latest
