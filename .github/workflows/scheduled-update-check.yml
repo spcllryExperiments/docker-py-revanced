@@ -16,12 +16,12 @@ jobs:
           echo "::set-output name=tag_name::$LATEST_RELEASE"
       - name: Compare with local version
         run: |
-          LOCAL_VERSION=$(cat latest-parsed-version.txt)
+          LOCAL_VERSION=$(cat latest-parsed-version.md)
           if [ "$LOCAL_VERSION" == "${{ steps.latest-release.outputs.tag_name }}" ]; then
             echo "Already up-to-date!"
           else
             echo "Local reported version doesn't match fetched version, updating local version and running new Build action!"
-            echo "${{ steps.latest-release.outputs.tag_name }}" > latest-parsed-version.txt
+            echo "${{ steps.latest-release.outputs.tag_name }}" > latest-parsed-version.md
             echo "::set-output name=trigger_build::true"
           fi
         id: compare-version
@@ -39,5 +39,5 @@ jobs:
         if: ${{ steps.compare-version.outputs.trigger_build == 'true' }}
         uses: benc-uk/workflow-dispatch@v1.1
         with:
-          workflow: "Build & Release" #build-apk.yml
+          workflow: "Build & Release" # build-apk.yml
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
