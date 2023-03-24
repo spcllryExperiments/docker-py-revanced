@@ -28,7 +28,7 @@ jobs:
       - name: Verify local version update
         if: ${{ steps.compare-version.outputs.trigger_build == 'true' }}
         run: |
-          UPDATED_VERSION=$(cat latest-parsed-version.txt)
+          UPDATED_VERSION=$(cat latest-parsed-version.md)
           if [ "$UPDATED_VERSION" == "${{ steps.latest-release.outputs.tag_name }}" ]; then
             echo "Local version updated successfully!"
           else
