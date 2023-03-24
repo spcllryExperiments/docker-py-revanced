@@ -28,5 +28,5 @@ jobs:
         if: ${{ steps.compare-version.outputs.trigger_build == 'true' }}
         uses: benc-uk/workflow-dispatch@v1.1
         with:
-          workflow: build-apk.yml
+          workflow: "Build & Release" #build-apk.yml
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
