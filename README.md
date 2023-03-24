@@ -1,6 +1,7 @@
 ###### 23/MAR/2023:
 ### Builds are now automated!
-Added scheduled action that checks for patch updates, and if an update is found, it will automatically trigger the workflow to build and release the updated applications.
+Added scheduled action that checks for patch updates, and if an update is found, automatically triggers the workflow that builds and releases the updated applications.
+
 <hr>
 
 ### Feel free to fork this fork.
