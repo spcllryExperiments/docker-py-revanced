@@ -60,7 +60,21 @@ jobs:
       DEBUG_ENABLED: ${{ inputs.DEBUG_ENABLED }}
     secrets:
       ENVS: ${{ secrets.ENVS }}
+      
+  generate_release_notes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
 
+      - name: Get YouTube Version
+        id: youtube-version
+        run: echo "::set-output name=version::$(echo $GITHUB_REF | sed -n 's/.*\/\(.*\)/\1/p' | sed 's/-/./g')"
+
+      - name: Get YouTube Music Version
+        id: youtube-music-version
+        run: echo "::set-output name=version::$(grep -oP '(?<=versionName=")[^"]*' app/build.gradle | head -n1)"
+        
   upload-to-github:
     name: GitHub Upload
     runs-on: ubuntu-latest
