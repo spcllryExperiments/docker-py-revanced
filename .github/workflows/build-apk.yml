@@ -90,7 +90,10 @@ jobs:
         run: |
           release_id=$(curl -s https://api.github.com/repos/inotia00/revanced-patches/releases/latest | jq -r '.id')
           body=$(curl -s https://api.github.com/repos/inotia00/revanced-patches/releases/$release_id | jq -r '.body')
+          body=$(echo $body | tr -d '\r' | sed -z 's/\n/\\n/g')
           echo "::set-output name=body::$body"
+
+
 
 
       - name: Upload Build Artifact
