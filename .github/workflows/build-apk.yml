@@ -88,8 +88,10 @@ jobs:
       - name: Get Release Body
         id: get-release-body
         run: |
-            body=$(curl -s https://api.github.com/repos/inotia00/revanced-patches/releases/latest | jq -r '.body')
-            echo "::set-output name=body::$body"
+          release_id=$(curl -s https://api.github.com/repos/inotia00/revanced-patches/releases/latest | jq -r '.id')
+          body=$(curl -s https://api.github.com/repos/inotia00/revanced-patches/releases/$release_id | jq -r '.body')
+          echo "::set-output name=body::$body"
+
 
       - name: Upload Build Artifact
         uses: ncipollo/release-action@v1.12.0
@@ -103,7 +105,7 @@ jobs:
             | ReVanced Extended **YouTube**       | custom-brading-afn-red         | Latest Supported | arm64-v8a, armeabi-v7a |
             | ReVanced Extended **YouTube Music** | custom-branding-music-afn-blue | Latest Available | arm64-v8a              |
             
-            Release patch notes:
+            ### Release patch notes:
             ${{ steps.get-release-body.outputs.body }}
 
           tag: ReVanced-Extended-with-patches-${{ env.PATCHES_VERSION }}-built-on-${{ steps.get-date.outputs.date }}
