@@ -9,6 +9,8 @@ jobs:
   prune-workflow-runs:
     name: Prune Older Workflow Runs
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Setup Octokit
         uses: octokit/request-action@v2.x
@@ -19,9 +21,6 @@ jobs:
         with:
           route: GET /repos/${{ github.repository }}/actions/workflows
           mediaType: "application/vnd.github.v3+json"
-
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
       - name: Prune Workflow Runs
         id: runs
@@ -30,15 +29,9 @@ jobs:
           route: GET /repos/${{ github.repository }}/actions/runs
           mediaType: "application/vnd.github.v3+json"
           workflow_id: ${{ steps.workflows.outputs.data.*.id }}
-
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
       - name: Delete Older Runs
         uses: octokit/request-action@v2.x
         with:
           route: DELETE /repos/${{ github.repository }}/actions/runs/${{ steps.runs.outputs.data.*.id }}
           mediaType: "application/vnd.github.v3+json"
-
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
