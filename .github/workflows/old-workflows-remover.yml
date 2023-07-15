@@ -25,12 +25,11 @@ jobs:
       - name: Install GitHub CLI
         run: npm install -g gh@2
 
+      - name: Authenticate with GitHub CLI
+        run: gh auth login --with-token ${{ secrets.GITHUB_SECRET }}
+
       - name: Prune Runs
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_SECRET: ${{ secrets.GITHUB_SECRET }}
         run: |
-          gh auth login --with-token <<< "${GITHUB_SECRET}"
           gh pr list -L 5 --json number,state,base.repo.full_name -q "is:merged base:${{ github.ref }}" |
           jq -r ".[].number" |
           xargs -I {} gh pr close {}
