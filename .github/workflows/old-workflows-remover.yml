@@ -1,4 +1,4 @@
-name: Prune Older Workflow Runs
+name: Remove Older Workflow Runs
 
 env:
   GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
