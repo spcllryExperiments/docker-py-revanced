@@ -10,40 +10,28 @@ jobs:
     name: Prune Older Workflow Runs
     runs-on: ubuntu-latest
     steps:
-      - name: Setup GitHub Script
-        uses: actions/github-script@v4
-        with:
-          script: npm install @actions/github@v5
+      - name: Setup Octokit
+        uses: octokit/request-action@v2.x
 
       - name: Prune Runs
-        uses: actions/github-script@v4
+        uses: octokit/request-action@v2.x
         with:
-          script: |
-            const repo = context.repo;
-            const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
-            
-            const workflows = await octokit.actions.listRepoWorkflows({
-              ...repo,
-              per_page: 100 // Increase the per_page value if needed
-            });
-            
-            for (const workflow of workflows.data.workflows) {
-              console.log(`Listing runs for workflow: ${workflow.name}`);
-              const runs = await octokit.actions.listWorkflowRuns({
-                ...repo,
-                workflow_id: workflow.id,
-                status: 'completed',
-                per_page: 100 // Increase the per_page value if needed
-              });
-              
-              if (runs.data.total_count > 5) {
-                const runsToDelete = runs.data.workflow_runs.slice(5).map(run => run.id);
-                for (const runId of runsToDelete) {
-                  console.log(`Deleting run: ${runId}`);
-                  await octokit.actions.deleteWorkflowRun({
-                    ...repo,
-                    run_id: runId
-                  });
-                }
-              }
-            }
+          route: GET /repos/${{ github.repository }}/actions/workflows
+          token: ${{ secrets.GITHUB_TOKEN }}
+        
+        id: workflows
+        
+      - name: Prune Workflow Runs
+        uses: octokit/request-action@v2.x
+        with:
+          route: GET /repos/${{ github.repository }}/actions/runs
+          token: ${{ secrets.GITHUB_TOKEN }}
+          workflow_id: ${{ steps.workflows.outputs.data.*.id }}
+        
+        id: runs
+        
+      - name: Delete Older Runs
+        uses: octokit/request-action@v2.x
+        with:
+          route: DELETE /repos/${{ github.repository }}/actions/runs/${{ steps.runs.outputs.data.*.id }}
+          token: ${{ secrets.GITHUB_TOKEN }}
