@@ -5,59 +5,32 @@ on:
   schedule:
     - cron: "0 */12 * * *"
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GITHUB_SECRET: ${{ secrets.GITHUB_SECRET }}
+
 jobs:
   prune-workflow-runs:
     name: Prune Older Workflow Runs
     runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Setup Node.js
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up GitHub CLI
         uses: actions/setup-node@v2
         with:
           node-version: "14"
 
-      - name: Install Dependencies
-        run: npm install @octokit/rest
+      - name: Install GitHub CLI
+        run: npm install -g gh@2
 
       - name: Prune Runs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_SECRET: ${{ secrets.GITHUB_SECRET }}
         run: |
-          const { Octokit } = require('@octokit/rest');
-          const octokit = new Octokit({
-            auth: process.env.GITHUB_TOKEN,
-          });
-          const owner = process.env.GITHUB_REPOSITORY_OWNER;
-          const repo = process.env.GITHUB_REPOSITORY;
-
-          octokit.actions.listWorkflowRuns({
-            owner,
-            repo,
-            per_page: 100,
-            status: 'completed',
-          }).then(({ data: workflowRuns }) => {
-            const promises = [];
-            for (const workflowRun of workflowRuns) {
-              if (promises.length >= 5) {
-                break;
-              }
-              if (workflowRun.status === 'completed') {
-                promises.push(octokit.actions.deleteWorkflowRun({
-                  owner,
-                  repo,
-                  run_id: workflowRun.id,
-                }));
-              }
-            }
-            return Promise.allSettled(promises);
-          }).then((results) => {
-            results.forEach((result) => {
-              if (result.status === 'fulfilled') {
-                console.log(`Deleted workflow run: ${result.value.data.id}`);
-              } else {
-                console.log(`Failed to delete workflow run: ${result.reason}`);
-              }
-            });
-          }).catch((error) => {
-            console.error('Error:', error);
-            process.exit(1);
-          });
+          gh auth login --with-token <<< "${GITHUB_SECRET}"
+          gh pr list -L 5 --json number,state,base.repo.full_name -q "is:merged base:${{ github.ref }}" |
+          jq -r ".[].number" |
+          xargs -I {} gh pr close {}
