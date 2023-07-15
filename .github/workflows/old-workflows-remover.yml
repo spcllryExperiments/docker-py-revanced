@@ -18,7 +18,7 @@ jobs:
         uses: octokit/request-action@v2.x
         with:
           route: GET /repos/${{ github.repository }}/actions/workflows
-          mediaType: {}
+          mediaType: "application/vnd.github.v3+json"
 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -28,7 +28,7 @@ jobs:
         uses: octokit/request-action@v2.x
         with:
           route: GET /repos/${{ github.repository }}/actions/runs
-          mediaType: {}
+          mediaType: "application/vnd.github.v3+json"
           workflow_id: ${{ steps.workflows.outputs.data.*.id }}
 
         env:
@@ -38,7 +38,7 @@ jobs:
         uses: octokit/request-action@v2.x
         with:
           route: DELETE /repos/${{ github.repository }}/actions/runs/${{ steps.runs.outputs.data.*.id }}
-          mediaType: {}
+          mediaType: "application/vnd.github.v3+json"
 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
