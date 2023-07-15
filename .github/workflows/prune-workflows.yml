@@ -18,7 +18,7 @@ jobs:
       - name: Get Workflow Runs
         id: get-runs
         run: |
-          echo "::set-output name=runs::$(gh workflow run list --json id,status --query '[].{id:id,status:status}' | jq -r '.[] | select(.status != "in_progress") | .id')"
+          echo "::set-output name=runs::$(gh workflow run list --json id,status | jq -r '.[] | select(.status != "in_progress") | .id')"
 
       - name: Sort Workflow Runs
         id: sort-runs
