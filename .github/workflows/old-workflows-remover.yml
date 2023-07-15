@@ -18,7 +18,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Get the runs list
-          runs=$(curl -s -X GET -H "Authorization: Bearer $GITHUB_TOKEN" "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs" | jq '[.workflow_runs | sort_by(.created_at) | .[:-20]] | map(.id) | join(" ")')
+          runs_response=$(curl -s -X GET -H "Authorization: Bearer $GITHUB_TOKEN" "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs")
+
+          # Debug: Output the response for troubleshooting
+          echo "Response:"
+          echo "$runs_response"
+
+          # Extract run IDs
+          runs=$(echo "$runs_response" | jq '[.workflow_runs | sort_by(.created_at) | .[:-20]] | map(.id) | join(" ")')
+
+          # Debug: Output the extracted run IDs for troubleshooting
+          echo "Run IDs:"
+          echo "$runs"
 
           # Loop through each run and delete it
           for run in $runs; do
