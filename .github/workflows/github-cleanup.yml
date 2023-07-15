@@ -1,15 +1,34 @@
-name: GitHub Cleanup
+name: Prune Older Workflow Runs
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  GITHUB_REPOSITORY: ${{ secrets.GITHUB_REPOSITORY }}
 
 on:
   workflow_call:
     secrets:
-      GH_TOKEN:
-        required: true
-  workflow_dispatch:
+      - GITHUB_REPOSITORY
+      - GH_TOKEN
+  schedule:
+    - cron: "0 */12 * * *"
 
 jobs:
-  cleanup:
-    name: GitHub Cleanup
-    uses: nikhilbadyal/ghactions/.github/workflows/github-cleanup.yml@main
-    secrets:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  prune-workflow-runs:
+    name: Prune Older Workflow Runs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cleanup
+        run: |
+          workflow_ids=$(gh api repos/"$GITHUB_REPOSITORY"/actions/workflows | jq -r '.workflows[].id')
+          for workflow_id in $workflow_ids; do
+            echo "Listing runs for workflow ID $workflow_id"
+            run_ids=$(gh api repos/"$GITHUB_REPOSITORY"/actions/workflows/"$workflow_id"/runs?status=completed --paginate | jq -r '.workflow_runs[].id' | sort -rn)
+            IFS=$'\n' read -r -d '' -a run_ids_array <<<"$run_ids"
+            if [[ ${#run_ids_array[@]} -gt 5 ]]; then
+              runs_to_delete=("${run_ids_array[@]:5}")
+              for run_id in "${runs_to_delete[@]}"; do
+                echo "Deleting Run ID $run_id"
+                gh api repos/"$GITHUB_REPOSITORY"/actions/runs/"$run_id" -X DELETE >/dev/null
+              done
+            fi
+          done
