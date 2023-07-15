@@ -6,10 +6,10 @@ env:
 
 on:
   workflow_dispatch:
-  workflow_call:
-    secrets:
-      - GITHUB_REPOSITORY
-      - GH_TOKEN
+    inputs:
+      branch:
+        description: 'Branch name'
+
   schedule:
     - cron: "0 */12 * * *"
 
