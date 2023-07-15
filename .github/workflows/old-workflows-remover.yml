@@ -30,6 +30,6 @@ jobs:
 
       - name: Prune Runs
         run: |
-          gh pr list -L 5 --json number,state,base.repo.full_name -q "is:merged base:${{ github.ref }}" |
+          gh pr list --limit 5 --json number,state,base.repo.full_name --search "is:merged" |
           jq -r ".[].number" |
           xargs -I {} gh pr close {}
