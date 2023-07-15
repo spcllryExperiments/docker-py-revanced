@@ -23,13 +23,13 @@ jobs:
           node-version: "14"
 
       - name: Install GitHub CLI
-        run: npm install -g gh@2
+        run: npm install -g github-cli@2
 
       - name: Authenticate with GitHub CLI
         run: gh auth login --with-token ${{ secrets.GITHUB_SECRET }}
 
       - name: Prune Runs
         run: |
-          gh pr list --limit 5 --json number,state,base.repo.full_name --search "is:merged" |
+          github-cli pr list --limit 5 --state merged |
           jq -r ".[].number" |
-          xargs -I {} gh pr close {}
+          xargs -I {} github-cli pr close {}
