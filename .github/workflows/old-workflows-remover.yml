@@ -1,4 +1,4 @@
-name: Delete Oldest Workflow Runs
+name: Delete Old Workflow Runs
 
 on:
   schedule:
@@ -13,12 +13,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Delete Oldest Workflow Runs
+      - name: Delete Old Workflow Runs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Get the runs list
-          runs=$(curl -s -X GET -H "Authorization: Bearer $GITHUB_TOKEN" "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs" | jq '.workflow_runs | sort_by(.created_at) | .[:750]')
+          runs=$(curl -s -X GET -H "Authorization: Bearer $GITHUB_TOKEN" "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs" | jq '.workflow_runs | sort_by(.created_at) | .[:-20]')
 
           # Loop through each run and delete it
           for run in $(echo "$runs" | jq -r '.[].id'); do
