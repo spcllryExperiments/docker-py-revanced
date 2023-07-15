@@ -1,7 +1,7 @@
 name: Prune Older Workflow Runs
 
 env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_SECRET }}
+  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
   GITHUB_REPOSITORY: ${{ secrets.GITHUB_REPOSITORY }}
 
 on:
@@ -9,7 +9,7 @@ on:
   workflow_call:
     secrets:
       - GITHUB_REPOSITORY
-      - GITHUB_SECRET
+      - GH_TOKEN
   schedule:
     - cron: "0 */12 * * *"
 
