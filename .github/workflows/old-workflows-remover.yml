@@ -14,33 +14,31 @@ jobs:
         uses: octokit/request-action@v2.x
 
       - name: Prune Runs
+        id: workflows
         uses: octokit/request-action@v2.x
         with:
           route: GET /repos/${{ github.repository }}/actions/workflows
           mediaType: {}
-        
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
-        id: workflows
-        
       - name: Prune Workflow Runs
+        id: runs
         uses: octokit/request-action@v2.x
         with:
           route: GET /repos/${{ github.repository }}/actions/runs
           mediaType: {}
           workflow_id: ${{ steps.workflows.outputs.data.*.id }}
-        
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
-        id: runs
         
       - name: Delete Older Runs
         uses: octokit/request-action@v2.x
         with:
           route: DELETE /repos/${{ github.repository }}/actions/runs/${{ steps.runs.outputs.data.*.id }}
           mediaType: {}
-        
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
