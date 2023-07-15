@@ -25,7 +25,7 @@ jobs:
           echo "$runs_response"
 
           # Extract run IDs
-          runs=$(echo "$runs_response" | jq '[.workflow_runs | sort_by(.created_at) | .[:-20]] | map(.id) | join(" ")')
+          runs=$(echo "$runs_response" | jq '[.workflow_runs | sort_by(.created_at) | .[:-20][] | .id] | join(" ")')
 
           # Debug: Output the extracted run IDs for troubleshooting
           echo "Run IDs:"
