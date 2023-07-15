@@ -49,6 +49,11 @@ jobs:
     permissions:
       actions: write
     steps:
+      - name: Delay before deletion
+        run: |
+          echo "Delaying for 2000 ms..."
+          sleep 2 # Delay for 2000 ms (2 seconds)
+
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@v2
         with:
@@ -60,3 +65,4 @@ jobs:
           delete_workflow_by_state_pattern: ${{ github.event.inputs.delete_workflow_by_state_pattern }}
           delete_run_by_conclusion_pattern: ${{ github.event.inputs.delete_run_by_conclusion_pattern }}
           dry_run: ${{ github.event.inputs.dry_run }}
+
