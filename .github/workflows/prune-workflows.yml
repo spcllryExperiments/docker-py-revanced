@@ -1,0 +1,33 @@
+name: Delete Old Workflow Runs
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */12 * * *"
+
+jobs:
+  delete-old-runs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Authenticate with GitHub Token
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get Workflow Runs
+        id: get-runs
+        run: |
+          echo "::set-output name=runs::$(gh workflow run list --json id,status --query '[].{id:id,status:status}' | jq -r '.[] | select(.status != "in_progress") | .id')"
+
+      - name: Sort Workflow Runs
+        id: sort-runs
+        run: |
+          echo "::set-output name=sorted_runs::$(echo '${{ steps.get-runs.outputs.runs }}' | tr ' ' '\n' | sort -r | tr '\n' ' ')"
+
+      - name: Delete Old Workflow Runs
+        run: |
+          for run_id in ${{ steps.sort-runs.outputs.sorted_runs }}; do
+            echo "Deleting run ID: $run_id"
+            gh workflow run delete $run_id --force
+          done
